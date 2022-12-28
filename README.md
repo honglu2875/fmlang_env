@@ -21,9 +21,9 @@ for i in range(10):
 ```
 
 ## What it does
-It starts with empty string. Each action is either
-- insert a character which is either a digit or one or `"()+-*/"`, aiming to form an arithmetic expression,
-- or delete the previous character
+It starts with an empty string. Each action is either
+- inserting a character which is either a digit or one or `"()+-*/"`, aiming to form an arithmetic expression,
+- or deleting the previous character.
 
 When env is initialized, one can set the max length of an expression `max_len`.
 Every time the env is reset, there is a hidden target number.
@@ -40,7 +40,7 @@ reward be this number at the next observation. When the expression is invalid, t
 ### Observation space:
 - `(max_len, )`, min = `0`, max = `16`.
 
-`0` represents empty, and `1-16` represents each possible character.
+`0` represents empty string, and `1-16` represents each possible character.
 
 ### Action space:
 - Discrete(17)
