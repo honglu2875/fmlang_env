@@ -33,7 +33,7 @@ The accumulated reward is
 $$\text{min}(100, \dfrac{1}{|\text{eval} - \text{target}|}).$$
 
 where `eval` is the eval result, and `target` is the target number. The step reward is what updates the accumulated
-reward be this number at the next observation. When the expression is invalid, the step reward is `0`.
+reward for the next observation. When the expression is invalid, the step reward is `0`.
 
 ## Specifications
 
