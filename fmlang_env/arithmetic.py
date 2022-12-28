@@ -1,5 +1,5 @@
 import random
-from typing import TypeVar
+from typing import TypeVar, Union
 
 import gym
 import numpy as np
@@ -22,18 +22,30 @@ class Arithmetic(gym.Env):
     allowed_characters = list(map(str, range(10))) + list("()+-*/")
     char_num = len(allowed_characters)
 
-    def __init__(self, max_len=100, observe_rew=True, observe_target=False):
+    def __init__(
+        self, max_len=100, observe_rew=True, observe_target=False, flatten_obs=True
+    ):
         """
         :param max_len: the maximal length of the expression.
         :param observe_rew: add accumulated reward into the observation.
         :param observe_target: add the target number into the observation.
+        :param flatten_obs: if `observe_rew` or `observe_target` is on, instead of returning a dict,
+            return a flattened array.
         """
         self.observe_rew = observe_rew
         self.observe_target = observe_target
+        self.flatten_obs = flatten_obs
 
         if not observe_rew and not observe_target:
             self.observation_space = gym.spaces.Box(
                 low=0, high=self.char_num, shape=(max_len,), dtype=np.uint8
+            )
+        elif flatten_obs:
+            self.observation_space = gym.spaces.Box(
+                low=0,
+                high=max(100, max_len),
+                shape=(max_len + observe_target + observe_rew,),
+                dtype=np.float32,
             )
         else:
             obs_sp = {
@@ -106,16 +118,32 @@ class Arithmetic(gym.Env):
         print(self.state)
 
     def _get_obs(self):
-        if isinstance(self.observation_space, gym.spaces.Box):
+        if not self.observe_rew and not self.observe_target:
             return self.num_state
         else:
-            assert isinstance(self.observation_space, gym.spaces.Dict)
             obs = {"state": self.num_state}
             if self.observe_rew:
-                obs["acc_rew"] = self.last_acc_rew
+                obs["acc_rew"] = np.array([self.last_acc_rew])
             if self.observe_target:
-                obs["target"] = self.target_num
+                obs["target"] = np.array([self.target_num])
+            if self.flatten_obs:
+                obs = self._flatten_obs(obs)
             return obs
 
     def _get_info(self):
         return {"text": self.state}
+
+    @staticmethod
+    def _flatten_obs(obs: Union[dict, np.ndarray]) -> np.ndarray:
+        if isinstance(obs, np.ndarray):
+            return obs.astype(np.float32)
+
+        # fixing keys and orders to make sure the flattened array represent data in a given order.
+        keys = ["state", "acc_rew", "target"]
+
+        res = []
+        for key in keys:
+            if key in obs:
+                res.append(np.float32(obs[key]))
+
+        return np.concatenate(res, axis=0)
