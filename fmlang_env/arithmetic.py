@@ -71,7 +71,10 @@ class Arithmetic(gym.Env):
         self.last_acc_rew = 0.0
         self.target_num = random.random() * self.max_len
 
-        return self._get_obs(), self._get_info()
+        if GYM_VERSION >= 0.22:
+            return self._get_obs(), self._get_info()
+        else:
+            return self._get_obs()  # no info for earlier version
 
     def render(self, mode="human"):
         print(self.state)
