@@ -22,11 +22,37 @@ class Arithmetic(gym.Env):
     allowed_characters = list(map(str, range(10))) + list("()+-*/")
     char_num = len(allowed_characters)
 
-    def __init__(self, max_len=100):
-        self.observation_space = gym.spaces.Box(
-            low=0, high=self.char_num, shape=(max_len,), dtype=np.uint8
-        )
+    def __init__(self, max_len=100, observe_rew=True, observe_target=False):
+        """
+        :param max_len: the maximal length of the expression.
+        :param observe_rew: add accumulated reward into the observation.
+        :param observe_target: add the target number into the observation.
+        """
+        self.observe_rew = observe_rew
+        self.observe_target = observe_target
+
+        if not observe_rew and not observe_target:
+            self.observation_space = gym.spaces.Box(
+                low=0, high=self.char_num, shape=(max_len,), dtype=np.uint8
+            )
+        else:
+            obs_sp = {
+                "state": gym.spaces.Box(
+                    low=0, high=self.char_num, shape=(max_len,), dtype=np.uint8
+                ),
+            }
+            if observe_rew:
+                obs_sp["acc_rew"] = gym.spaces.Box(
+                    low=0.0, high=100.0, shape=(1,), dtype=np.float32
+                )
+            if observe_target:
+                obs_sp["target"] = gym.spaces.Box(
+                    low=0.0, high=max_len, shape=(1,), dtype=np.float32
+                )
+            self.observation_space = gym.spaces.Dict(obs_sp)
+
         self.action_space = gym.spaces.Discrete(self.char_num + 1)
+
         self.state, self.num_state, self.last_acc_rew, self.target_num = (
             None,
             None,
@@ -80,7 +106,16 @@ class Arithmetic(gym.Env):
         print(self.state)
 
     def _get_obs(self):
-        return self.num_state
+        if isinstance(self.observation_space, gym.spaces.Box):
+            return self.num_state
+        else:
+            assert isinstance(self.observation_space, gym.spaces.Dict)
+            obs = {"state": self.num_state}
+            if self.observe_rew:
+                obs["acc_rew"] = self.last_acc_rew
+            if self.observe_target:
+                obs["target"] = self.target_num
+            return obs
 
     def _get_info(self):
         return {"text": self.state}
