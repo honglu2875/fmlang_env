@@ -86,7 +86,7 @@ class Arithmetic(gym.Env):
                 self.state += self.allowed_characters[action]
 
         try:
-            r = float(min(100.0, 1 / eval(self.state)))
+            r = float(min(100.0, 1 / abs(eval(self.state) - self.target_num)))
         except:  # noqa: E722
             r = None
 
