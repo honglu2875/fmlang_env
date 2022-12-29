@@ -86,16 +86,15 @@ class Arithmetic(gym.Env):
                 self.state += self.allowed_characters[action]
 
         try:
-            r = eval(self.state)
+            r = float(min(100.0, 1 / eval(self.state)))
         except:  # noqa: E722
             r = None
 
         if r is not None:
             # 1 / (abs difference) is the accumulated reward (capped at 100).
             # the single-step reward is the current acc reward minus the last acc reward.
-            acc_rew = 1 / max(0.01, abs(self.target_num - r))
-            reward = acc_rew - self.last_acc_rew
-            self.last_acc_rew = acc_rew
+            reward = r - self.last_acc_rew
+            self.last_acc_rew = r
         else:
             reward = 0.0
 
