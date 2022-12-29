@@ -1,3 +1,5 @@
+![status](https://github.com/honglu2875/fmlang_env/actions/workflows/ci.yml/badge.svg?branch=main)
+
 # fmlang_env
 Toy gym env related to formal languages.
 
