@@ -46,3 +46,11 @@ reward for the next observation. When the expression is invalid, the step reward
 - Discrete(17)
 
 `0-15` represents each character, and `16` means to delete the last character if any.
+
+## A couple quirky things
+
+- eval of empty string leads to syntax error. This is a great feature as to not exposing
+the hidden target number as otherwise our agent can hit backspace and get the number right-away
+- the definition of observation space representation and the action space can be confusing. Note
+that `0` represents empty character in observation space and all digits are 1-based. But in action
+space digits are 0-based with backspace being the last action button.
